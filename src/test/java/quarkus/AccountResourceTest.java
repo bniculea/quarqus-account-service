@@ -3,23 +3,29 @@ package quarkus;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
-import jakarta.ws.rs.core.MediaType;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import quarkus.domain.Account;
 import quarkus.domain.AccountStatus;
 
 import java.math.BigDecimal;
-import java.net.http.HttpHeaders;
 import java.util.List;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.closeTo;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
+import static org.hamcrest.core.IsEqual.equalTo;
 
 
 @QuarkusTest
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class AccountResourceTest {
 
     @Test
@@ -56,10 +62,10 @@ public class AccountResourceTest {
                         .extract()
                         .as(Account.class);
 
-        assertThat(account.getAccountNumber(), equalTo(545454545));
+        assertThat(account.getAccountNumber(), equalTo(545454545L));
         assertThat(account.getCustomerName(), equalTo("Diana Rigg"));
-        assertThat(account.getBalance(), equalTo(422.0));
-        assertThat(account.getAccountStatus(), equalTo(AccountStatus.OPEN));
+        assertThat(account.getBalance().toBigInteger().doubleValue(), closeTo(422.00, 0.01));
+        assertThat("Account is not open",account.getAccountStatus(), equalTo(AccountStatus.OPEN));
     }
 
     @Test
